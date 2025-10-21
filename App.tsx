@@ -11,18 +11,16 @@ const App: React.FC = () => {
   const [symbol, setSymbol] = useState('BTCUSDT');
   const [timeFrame, setTimeFrame] = useState<TimeFrame>(TimeFrameEnum.FifteenMinutes);
   const { data, latestPrice, status } = useCryptoData(symbol, timeFrame, 15000);
-  const { requestPermission, sendNotification, permission, subscribeToPush, isSubscribed } = useNotifications();
+  const { requestPermission, sendNotification, permission, subscribeToPush, isSubscribed, subscription } = useNotifications();
   
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [clickedPrice, setClickedPrice] = useState<number | null>(null);
 
   useEffect(() => {
-    // Save alerts to localStorage whenever they change, specific to the current symbol
     localStorage.setItem(`cryptoAlerts_${symbol}`, JSON.stringify(alerts));
   }, [alerts, symbol]);
 
   useEffect(() => {
-    // Load alerts from localStorage when the symbol changes
     try {
       const savedAlerts = localStorage.getItem(`cryptoAlerts_${symbol}`);
       setAlerts(savedAlerts ? JSON.parse(savedAlerts) : []);
@@ -60,17 +58,50 @@ const App: React.FC = () => {
     }
   }, [latestPrice, checkAlerts]);
 
-  const addAlert = (alert: Omit<Alert, 'id' | 'triggered'>) => {
-    // The alert passed in doesn't have a symbol, so we add the current one.
-    setAlerts(prev => [...prev, { ...alert, symbol: symbol, id: crypto.randomUUID(), triggered: false }]);
+  // FIX: Renamed the 'alert' parameter to 'alertData' to avoid shadowing the global window.alert function.
+  const addAlert = async (alertData: Omit<Alert, 'id' | 'triggered'>) => {
+    if (!subscription) {
+      alert("Cannot create alert: Push subscription not found. Please enable push alerts.");
+      return;
+    }
+    
+    const newAlert: Alert = { 
+      ...alertData, 
+      symbol: symbol, 
+      id: crypto.randomUUID(), 
+      triggered: false 
+    };
+
+    // Optimistically update UI
+    setAlerts(prev => [...prev, newAlert]);
+
+    // Send to backend to be saved in the database
+    try {
+      const response = await fetch('/api/add-alert', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ alert: newAlert, subscription }),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to save alert on server.');
+      }
+      console.log('Alert saved to DB');
+    } catch (error) {
+      console.error("Error saving alert:", error);
+      // Rollback UI update on failure
+      alert("Failed to save your alert. Please try again.");
+      setAlerts(prev => prev.filter(a => a.id !== newAlert.id));
+    }
   };
 
   const removeAlert = (id: string) => {
     setAlerts(prev => prev.filter(a => a.id !== id));
+    // Note: A full implementation would also send a request to the server to delete the alert from the DB.
   };
   
   const resetAlert = (id: string) => {
     setAlerts(prev => prev.map(a => a.id === id ? { ...a, triggered: false } : a));
+     // Note: A full implementation would also send a request to the server to reset the alert in the DB.
   };
 
   const handleChartClick = (price: number) => {

@@ -23,7 +23,8 @@ const SelectorButton: React.FC<{
 }> = ({ onClick, isActive, children }) => (
   <button
     onClick={onClick}
-    className={`px-3 py-2 sm:py-1.5 text-sm rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 focus:ring-offset-slate-900 ${
+    className={`px-3 py-2 sm:py-1.5 text-sm rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-of
+      fset-2 focus:ring-offset-slate-900 ${
       isActive
         ? 'bg-cyan-500 text-white font-semibold shadow-lg'
         : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
