@@ -1,0 +1,5 @@
+{
+  "name": "CrypTrack - Real-Time BTC Alerts",
+  "description": "A sleek, real-time Bitcoin price tracking application with a live candlestick chart and customizable push notifications for price alerts.",
+  "requestFramePermissions": []
+}
