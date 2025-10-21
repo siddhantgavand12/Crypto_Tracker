@@ -17,7 +17,7 @@ import { MongoClient } from 'mongodb';
 // --- CONFIGURATION ---
 const PORT = 3001;
 const BINANCE_WS_URL = 'wss://stream.binance.com:9443/ws/btcusdt@kline_1m'; // 1-minute klines
-const MONGO_URI = 'mongodb://localhost:27017';
+const MONGO_URI = 'mongodb+srv://siddhantgavand74_db_user:m96C8pHlqHZ8hQOT@cluster0.i7olwsw.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
 const DB_NAME = 'cryptotrack';
 
 // --- VAPID Keys for Web Push ---
