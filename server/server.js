@@ -86,7 +86,7 @@ function connectToBinance() {
     const message = JSON.parse(data);
     if (message.k) { // kline data
       const currentPrice = parseFloat(message.k.c); // Close price
-      console.log(`Current BTC Price: $${currentPrice.toFixed(2)}`);
+      // console.log(`Current BTC Price: $${currentPrice.toFixed(2)}`);
       checkAlerts(currentPrice);
     }
   });
